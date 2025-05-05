@@ -1,14 +1,20 @@
 import React from 'react';
-import { GrClose } from 'react-icons/gr';
+
+interface Expense {
+  id: number;
+  name: string;
+  amount: string;
+  date: string;
+}
 
 interface ModalProps {
-  data: any;
+  data: Expense | null;
   open: boolean;
   isEdit: boolean;
-  onClose: (e: any) => void;
-  handleData: (e: any) => void;
-  handleNewExpense: (e: any) => void;
-  handleEdit: (e: any) => void;
+  onClose: () => void;
+  handleData: (e: { target: { name: string; value: string } }) => void;
+  handleNewExpense: () => void;
+  handleEdit: () => void;
 }
 
 function Modal({
@@ -20,23 +26,22 @@ function Modal({
   handleNewExpense,
   handleEdit
 }: ModalProps) {
+  if (!open) return null;
+
   return (
-    <div
-      className={`fixed top-0 left-0 right-0 z-50 ${
-        open ? 'flex' : 'hidden'
-      } justify-center items-center w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full`}
-    >
-      <div className="relative w-full h-full max-w-2xl md:h-auto">
-        <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          <div className="flex items-center justify-between p-5 border-b rounded-t dark:border-gray-600">
-            <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add new Expense</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+      <div className="relative w-auto max-w-3xl mx-auto my-6">
+        <div className="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
+          <div className="flex items-start justify-between p-5 border-b border-solid rounded-t border-slate-200">
+            <h3 className="text-3xl font-semibold">{isEdit ? 'Edit Expense' : 'Add Expense'}</h3>
             <button
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-              data-modal-hide="extralarge-modal"
+              className="float-right p-1 ml-auto text-3xl font-semibold leading-none text-black bg-transparent border-0 outline-none opacity-5 focus:outline-none"
               type="button"
               onClick={onClose}
             >
-              <GrClose />
+              <span className="block w-6 h-6 text-2xl text-black bg-transparent outline-none opacity-5 focus:outline-none">
+                ×
+              </span>
             </button>
           </div>
           <div className="p-6 space-y-6">
@@ -53,22 +58,7 @@ function Modal({
                     name="name"
                     placeholder="Ex: Travelling expense"
                     type="text"
-                    value={data ? data.name : ''}
-                    onChange={handleData}
-                  />
-                </div>
-                <div className="mb-6 w-1/4">
-                  <label className="block mb-2 text-sm font-medium text-gray-900" htmlFor="date">
-                    Date
-                  </label>
-                  <input
-                    required
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    id="date"
-                    name="date"
-                    placeholder="1000.00"
-                    type="date"
-                    value={data ? data.date : 0}
+                    value={data?.name || ''}
                     onChange={handleData}
                   />
                 </div>
@@ -83,31 +73,42 @@ function Modal({
                     name="amount"
                     placeholder="1000.00"
                     type="number"
-                    value={data ? data.amount : 0}
+                    value={data?.amount || ''}
+                    onChange={handleData}
+                  />
+                </div>
+                <div className="mb-6 w-1/4">
+                  <label className="block mb-2 text-sm font-medium text-gray-900" htmlFor="date">
+                    Date
+                  </label>
+                  <input
+                    required
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    id="date"
+                    name="date"
+                    type="date"
+                    value={data?.date || ''}
                     onChange={handleData}
                   />
                 </div>
               </div>
-              <div>
-                {isEdit ? (
-                  <button
-                    className="focus:outline-none text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2"
-                    type="button"
-                    onClick={handleEdit}
-                  >
-                    Update
-                  </button>
-                ) : (
-                  <button
-                    className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    type="button"
-                    onClick={handleNewExpense}
-                  >
-                    Save
-                  </button>
-                )}
-              </div>
             </form>
+          </div>
+          <div className="flex items-center justify-end p-6 border-t border-solid rounded-b border-slate-200">
+            <button
+              className="px-6 py-2 mb-1 mr-1 text-sm font-bold text-red-500 uppercase transition-all duration-150 ease-linear outline-none background-transparent focus:outline-none"
+              type="button"
+              onClick={onClose}
+            >
+              Close
+            </button>
+            <button
+              className="px-6 py-3 mb-1 mr-1 text-sm font-bold text-white uppercase transition-all duration-150 ease-linear rounded shadow outline-none bg-emerald-500 active:bg-emerald-600 hover:shadow-lg focus:outline-none"
+              type="button"
+              onClick={isEdit ? handleEdit : handleNewExpense}
+            >
+              {isEdit ? 'Save Changes' : 'Add'}
+            </button>
           </div>
         </div>
       </div>

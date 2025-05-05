@@ -1,13 +1,64 @@
-declare module '*.jpg' {
-  const value: any;
-  export = value;
+/// <reference types="react" />
+/// <reference types="react-dom" />
+
+declare module '*.css' {
+  const content: { [className: string]: string };
+  export default content;
 }
-declare module '*.png' {
-  const value: any;
-  export = value;
+
+declare module '*.scss' {
+  const content: { [className: string]: string };
+  export default content;
+}
+
+declare module '*.sass' {
+  const content: { [className: string]: string };
+  export default content;
+}
+
+declare module '*.less' {
+  const content: { [className: string]: string };
+  export default content;
+}
+
+declare module '*.styl' {
+  const content: { [className: string]: string };
+  export default content;
 }
 
 declare module '*.svg' {
-  const value: string;
-  export = value;
+  import * as React from 'react';
+  export const ReactComponent: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
+  const src: string;
+  export default src;
+}
+
+declare module '*.png' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.jpg' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.jpeg' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.gif' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.webp' {
+  const content: string;
+  export default content;
+}
+
+declare module '*.json' {
+  const content: any;
+  export default content;
 }

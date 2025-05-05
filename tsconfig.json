@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
-    "jsx": "react",
-    "baseUrl": "src",
-    "outDir": "./dist/",
-    "noImplicitAny": true,
-    "module": "es6",
-    "lib": ["es2022", "ES6", "DOM"],
-    "target": "es6",
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
     "moduleResolution": "node",
-    "suppressImplicitAnyIndexErrors": false,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": "src"
   },
-  "include": ["src/**/*", "public/serviceWorker.js", "src/globals.d.ts"]
+  "include": ["src/**/*", "src/globals.d.ts"],
+  "exclude": ["node_modules"]
 }

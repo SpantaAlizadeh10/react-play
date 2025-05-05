@@ -6,40 +6,53 @@ import PlayHeader from 'common/playlists/PlayHeader';
 import useLocalStorage from 'common/hooks/useLocalStorage';
 import Modal from './components/modal';
 
+interface Expense {
+  id: number;
+  name: string;
+  amount: string;
+  date: string;
+}
+
 function ExpensesTracker(props: any) {
   const [localStoreExpenses, setLocalStoreExpenses] = useLocalStorage('et-expenses', []);
   const [localStoreTotal, setLocalStoreTotal] = useLocalStorage('et-total', 0);
 
   const [open, setOpen] = useState(false);
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<Expense | null>(null);
   const [isEdit, setIsEdit] = useState(false);
 
   const handleData = (e: { target: { name: string; value: string } }) => {
-    setData({ ...data, [e.target.name]: e.target.value });
+    setData((prevData) => ({
+      ...(prevData || { id: 0, name: '', amount: '', date: '' }),
+      [e.target.name]: e.target.value
+    }));
   };
 
   const handleNewExpense = () => {
+    if (!data) return;
+    
     const expense = localStoreExpenses[localStoreExpenses.length - 1];
-    // Ensure `amount` has a default value of 0 if not present
     const sanitizedData = {
       ...data,
-      amount: data.amount || 0
+      amount: data.amount || '0'
     };
-    sanitizedData['id'] = expense !== undefined ? parseInt(expense.id) + 1 : 1;
+    sanitizedData.id = expense !== undefined ? parseInt(expense.id) + 1 : 1;
     setLocalStoreExpenses([...localStoreExpenses, sanitizedData]);
     setLocalStoreTotal(parseFloat(localStoreTotal) + parseFloat(sanitizedData.amount));
     setOpen(false);
     setData(null);
   };
 
-  const openEditModal = (expenseEdit: any) => {
+  const openEditModal = (expenseEdit: Expense) => {
     setIsEdit(true);
     setData(expenseEdit);
     setOpen(true);
   };
 
   const handleEdit = () => {
-    const index = localStoreExpenses.findIndex((expense: any) => expense.id === data.id);
+    if (!data) return;
+    
+    const index = localStoreExpenses.findIndex((expense: Expense) => expense.id === data.id);
     const oldAmount: number = parseFloat(localStoreExpenses[index].amount);
     const newAmount: number = parseFloat(data.amount);
     setLocalStoreTotal(localStoreTotal - oldAmount + newAmount);
@@ -49,109 +62,77 @@ function ExpensesTracker(props: any) {
     setData(null);
   };
 
-  const handleDelete = (expenseObj: any) => {
-    const filterd = localStoreExpenses.filter((expense: any) => expense.id !== expenseObj.id);
-    setLocalStoreExpenses(filterd);
-    setLocalStoreTotal(localStoreTotal - parseFloat(expenseObj.amount));
+  const handleDelete = (id: number) => {
+    const expense = localStoreExpenses.find((expense: Expense) => expense.id === id);
+    if (expense) {
+      setLocalStoreTotal(localStoreTotal - parseFloat(expense.amount));
+      setLocalStoreExpenses(localStoreExpenses.filter((expense: Expense) => expense.id !== id));
+    }
   };
 
   return (
-    <>
-      <div className="play-details">
-        <PlayHeader play={props} />
-        <div className="grow p-4 overflow-y-auto">
-          <div className="w-9/10 lg:w-2/3 mx-auto bg-blue-200 shadow-sm">
-            <div className="bg-blue-800 text-white flex items-center p-3 justify-between">
-              <p className="text-lg font-bold">Expense Tracker</p>
-              {localStoreExpenses.length >= 1 ? (
-                <div className="flex justify-center">
-                  <button
-                    className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                    type="button"
-                    onClick={() => {
-                      setOpen(true);
-                      setIsEdit(false);
-                    }}
-                  >
-                    Add Expense
-                  </button>
-                </div>
-              ) : (
-                ''
-              )}
-            </div>
-            <div className="p-3">
-              {localStoreExpenses.length >= 1 ? (
-                <>
-                  <table className="table-auto w-full">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Expense</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {localStoreExpenses.map((expense: any) => {
-                        return (
-                          <tr key={expense.id}>
-                            <td className="p-1 text-center">{expense.id}</td>
-                            <td className="p-1 text-center">{expense.name}</td>
-                            <td className="p-1 text-center">{expense.date}</td>
-                            <td className="p-1 text-center">{expense.amount}</td>
-                            <td className="p-1 flex justify-center space-x-2">
-                              <div className="bg-green-500 cursor-pointer  rounded-full p-[6px]">
-                                <FiEdit
-                                  className="text-white"
-                                  size={16}
-                                  onClick={() => openEditModal(expense)}
-                                />
-                              </div>
-                              <div className="bg-red-500 cursor-pointer rounded-full p-[6px]">
-                                <AiOutlineDelete
-                                  className="text-white"
-                                  size={16}
-                                  onClick={() => handleDelete(expense)}
-                                />
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  <div className="font-bold text-2xl">{`Total: ${localStoreTotal}`}</div>
-                </>
-              ) : (
-                <div className="flex justify-center">
-                  <button
-                    className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2"
-                    type="button"
-                    onClick={() => {
-                      setOpen(true);
-                      setIsEdit(false);
-                    }}
-                  >
-                    Add Expense
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+    <div className="play-details">
+      <PlayHeader play={props} />
+      <div className="play-details-body">
+        <div className="w-11/12 md:w-4/5 mx-auto my-4 flex justify-between items-center">
+          <h3>Total: ${localStoreTotal}</h3>
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {
+              setOpen(true);
+              setIsEdit(false);
+              setData(null);
+            }}
+          >
+            Add Expense
+          </button>
         </div>
+        <div className="w-11/12 md:w-4/5 mx-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr>
+                <th className="text-left py-2">Name</th>
+                <th className="text-left py-2">Amount</th>
+                <th className="text-left py-2">Date</th>
+                <th className="text-left py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {localStoreExpenses.map((expense: Expense) => (
+                <tr key={expense.id}>
+                  <td className="py-2">{expense.name}</td>
+                  <td className="py-2">${expense.amount}</td>
+                  <td className="py-2">{expense.date}</td>
+                  <td className="py-2">
+                    <button
+                      className="text-blue-500 hover:text-blue-700 mr-2"
+                      onClick={() => openEditModal(expense)}
+                    >
+                      <FiEdit size={20} />
+                    </button>
+                    <button
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() => handleDelete(expense.id)}
+                    >
+                      <AiOutlineDelete size={20} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <Modal
+          data={data}
+          open={open}
+          isEdit={isEdit}
+          onClose={() => setOpen(false)}
+          handleData={handleData}
+          handleNewExpense={handleNewExpense}
+          handleEdit={handleEdit}
+        />
       </div>
-      <Modal
-        data={data}
-        open={open}
-        handleData={handleData}
-        handleNewExpense={handleNewExpense}
-        handleEdit={handleEdit}
-        onClose={() => setOpen(false)}
-        isEdit={isEdit}
-      />
-    </>
+    </div>
   );
 }
 
